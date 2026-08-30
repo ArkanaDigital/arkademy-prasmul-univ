@@ -1,0 +1,55 @@
+<odoo>
+    <record id="view_academy_course_list" model="ir.ui.view">
+        <field name="name">academy.course.list</field>
+        <field name="model">academy.course</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="code"/>
+                <field name="level"/>
+                <field name="price"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_academy_course_form" model="ir.ui.view">
+        <field name="name">academy.course.form</field>
+        <field name="model">academy.course</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="code"/>
+                            <field name="level"/>
+                        </group>
+                        <group>
+                            <field name="price"/>
+                            <field name="currency_id"/>
+                            <field name="duration_hours"/>
+                        </group>
+                    </group>
+                    <field name="description"/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_academy_course_search" model="ir.ui.view">
+        <field name="name">academy.course.search</field>
+        <field name="model">academy.course</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="code"/>
+                <filter name="active" string="Active"
+                        domain="[('active', '=', True)]"/>
+                <group>
+                    <filter name="grp_level" string="Level"
+                            context="{'group_by':'level'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+</odoo>

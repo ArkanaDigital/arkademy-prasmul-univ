@@ -1,0 +1,35 @@
+<odoo>
+    <record id="action_academy_course" model="ir.actions.act_window">
+        <field name="name">Courses</field>
+        <field name="res_model">academy.course</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="action_academy_student" model="ir.actions.act_window">
+        <field name="name">Students</field>
+        <field name="res_model">academy.student</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem
+        id="menu_academy_root"
+        name="Academy"
+        sequence="10"
+    />
+
+    <menuitem
+        id="menu_academy_course"
+        name="Courses"
+        parent="menu_academy_root"
+        action="action_academy_course"
+        sequence="10"
+    />
+
+    <menuitem
+        id="menu_academy_student"
+        name="Students"
+        parent="menu_academy_root"
+        action="action_academy_student"
+        sequence="20"
+    />
+</odoo>

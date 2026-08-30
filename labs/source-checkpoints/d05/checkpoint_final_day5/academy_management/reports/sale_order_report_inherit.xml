@@ -1,0 +1,18 @@
+<odoo>
+    <!--
+        Trainer demo / optional participant task.
+        Meng-inherit report standar Odoo: Sales Order (sale.report_saleorder_document).
+        WAJIB module 'sale' ter-install. Jika 'sale' belum siap di environment peserta,
+        trainer cukup mendemokan; ini bukan blocker checkpoint berikutnya.
+        XPath memakai hasclass('page') agar stabil terhadap perubahan class.
+    -->
+    <template id="report_saleorder_document_academy_note"
+              inherit_id="sale.report_saleorder_document">
+        <xpath expr="//div[hasclass('page')]" position="inside">
+            <div class="mt-4">
+                <p><strong>Processed by Arkana Academy</strong></p>
+                <p>Academy Note: dicetak untuk keperluan training Odoo.</p>
+            </div>
+        </xpath>
+    </template>
+</odoo>

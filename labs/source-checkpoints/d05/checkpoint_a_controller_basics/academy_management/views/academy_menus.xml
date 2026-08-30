@@ -1,0 +1,18 @@
+<odoo>
+    <menuitem id="menu_academy_root" name="Academy" sequence="10"/>
+    <menuitem id="menu_academy_course" name="Courses"
+        parent="menu_academy_root" action="action_academy_course" sequence="10"/>
+    <menuitem id="menu_academy_student" name="Students"
+        parent="menu_academy_root" action="action_academy_student" sequence="20"/>
+    <menuitem id="menu_academy_batch" name="Batches"
+        parent="menu_academy_root" action="action_academy_batch" sequence="30"/>
+    <menuitem id="menu_academy_enrollment" name="Enrollments"
+        parent="menu_academy_root" action="action_academy_enrollment" sequence="40"/>
+    <menuitem id="menu_enrollment_export" name="Export Enrollments"
+        parent="menu_academy_root" action="action_enrollment_export_wizard" sequence="50"/>
+    <menuitem id="menu_import_courses" name="Import External Courses"
+        parent="menu_academy_root"
+        action="action_import_courses_wizard"
+        groups="academy_management.academy_group_manager"
+        sequence="60"/>
+</odoo>

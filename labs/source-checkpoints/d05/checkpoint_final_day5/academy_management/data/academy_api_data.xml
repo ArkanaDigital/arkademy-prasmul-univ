@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!--
+        Demo API key for Day 5 lab.
+        noupdate="1" — created once, never overwritten on module upgrade.
+        To rotate: Settings > Technical > System Parameters
+                   Key: academy_management.api_key
+    -->
+    <record id="academy_api_key_param" model="ir.config_parameter">
+        <field name="key">academy_management.api_key</field>
+        <field name="value">academy-demo-key</field>
+    </record>
+
+    <!--
+        Demo batches with unique code field.
+        Used as happy-path target for POST /academy/api/v1/enrollment-requests.
+    -->
+    <record id="batch_py101_jan" model="academy.batch">
+        <field name="name">Python Basics - January</field>
+        <field name="code">PY-101-JAN</field>
+        <field name="course_id" ref="course_python_basics"/>
+        <field name="capacity">20</field>
+        <field name="state">confirmed</field>
+    </record>
+
+    <record id="batch_odoo101_feb" model="academy.batch">
+        <field name="name">Odoo Fundamental - February</field>
+        <field name="code">ODOO-101-FEB</field>
+        <field name="course_id" ref="course_odoo_fundamental"/>
+        <field name="capacity">15</field>
+        <field name="state">confirmed</field>
+    </record>
+</odoo>

@@ -1,0 +1,26 @@
+<odoo>
+    <record id="view_academy_course_form_publishing" model="ir.ui.view">
+        <field name="name">academy.course.form.publishing</field>
+        <field name="model">academy.course</field>
+        <field name="inherit_id"
+               ref="academy_management.view_academy_course_form"/>
+        <field name="arch" type="xml">
+            <!-- <xpath expr="//sheet" position="inside">
+                <group string="Publishing">
+                    <field name="is_published"/>
+                    <field name="tag_ids" widget="many2many_tags"/>
+                    <field name="internal_notes"/>
+                </group>
+            </xpath> -->
+            <xpath expr="//notebook" position="inside">
+                <page name="publishing" string="Publishing">
+                    <group string="Publishing">
+                        <field name="is_published"/>
+                        <field name="tag_ids" widget="many2many_tags"/>
+                        <field name="internal_notes"/>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

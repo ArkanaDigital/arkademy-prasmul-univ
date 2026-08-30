@@ -1,0 +1,31 @@
+<odoo>
+    <record id="view_enrollment_export_wizard_form" model="ir.ui.view">
+        <field name="name">academy.enrollment.export.wizard.form</field>
+        <field name="model">academy.enrollment.export.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Export Enrollments">
+                <group>
+                    <field name="date_from"/>
+                    <field name="date_to"/>
+                    <field name="batch_id"/>
+                </group>
+                <group>
+                    <field name="file_name" invisible="1"/>
+                    <field name="file_data" filename="file_name" readonly="1"/>
+                </group>
+                <footer>
+                    <button name="action_export" string="Export"
+                            type="object" class="btn-primary"/>
+                    <button string="Close" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_enrollment_export_wizard" model="ir.actions.act_window">
+        <field name="name">Export Enrollments</field>
+        <field name="res_model">academy.enrollment.export.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

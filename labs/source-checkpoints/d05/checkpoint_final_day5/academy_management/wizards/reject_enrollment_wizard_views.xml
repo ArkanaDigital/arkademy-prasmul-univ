@@ -1,0 +1,27 @@
+<odoo>
+    <record id="view_reject_enrollment_wizard_form" model="ir.ui.view">
+        <field name="name">academy.enrollment.reject.wizard.form</field>
+        <field name="model">academy.enrollment.reject.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Reject Enrollment">
+                <group>
+                    <field name="rejection_reason"/>
+                </group>
+                <footer>
+                    <button name="action_reject" string="Reject"
+                            type="object" class="btn-danger"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_reject_enrollment_wizard" model="ir.actions.act_window">
+        <field name="name">Reject Enrollment</field>
+        <field name="res_model">academy.enrollment.reject.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="binding_model_id" ref="model_academy_enrollment"/>
+    </record>
+
+</odoo>

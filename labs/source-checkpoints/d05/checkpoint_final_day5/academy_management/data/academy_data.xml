@@ -1,0 +1,15 @@
+<odoo>
+    <record id="course_python_basics" model="academy.course">
+        <field name="name">Python Basics</field>
+        <field name="code">PY-101</field>
+        <field name="level">beginner</field>
+        <field name="duration_hours">16</field>
+    </record>
+
+    <record id="course_odoo_fundamental" model="academy.course">
+        <field name="name">Odoo Technical Fundamental</field>
+        <field name="code">ODT-101</field>
+        <field name="level">beginner</field>
+        <field name="duration_hours">40</field>
+    </record>
+</odoo>

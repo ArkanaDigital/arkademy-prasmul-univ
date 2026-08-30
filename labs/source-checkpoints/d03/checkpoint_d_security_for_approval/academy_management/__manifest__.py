@@ -1,0 +1,23 @@
+{
+    'name': 'Academy Management',
+    'version': '18.0.3.3.0',
+    'category': 'Education',
+    'summary': 'Academy Management - Day 3 (D) Security for Approval (Groups, Access Rights, Record Rules)',
+    'depends': ['base', 'mail'],
+    'data': [
+        'security/academy_groups.xml',
+        'security/ir.model.access.csv',
+        'security/academy_record_rules.xml',
+        'data/academy_data.xml',
+        'views/academy_course_views.xml',
+        'views/academy_student_views.xml',
+        'views/academy_batch_views.xml',
+        'views/academy_enrollment_views.xml',
+        'views/academy_course_inherit_views.xml',
+        'views/academy_batch_inherit_views.xml',
+        'views/academy_views.xml',
+        'views/academy_menus.xml',
+    ],
+    'application': True,
+    'license': 'LGPL-3',
+}

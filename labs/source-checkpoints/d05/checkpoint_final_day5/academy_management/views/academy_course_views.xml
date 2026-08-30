@@ -1,0 +1,93 @@
+<odoo>
+    <!-- this is list view for academy.course  -->
+    <record id="view_academy_course_list" model="ir.ui.view">
+        <field name="name">academy.course.list</field>
+        <field name="model">academy.course</field>
+        <field name="priority">10</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="code"/>
+                <field name="level"/>
+                <field name="duration_hours"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="price" widget="monetary"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_academy_course_list_simple" model="ir.ui.view">
+        <field name="name">academy.course.list</field>
+        <field name="model">academy.course</field>
+        <field name="priority">30</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- this is form view for academy.course  -->
+    <record id="view_academy_course_form" model="ir.ui.view">
+        <field name="name">academy.course.form</field>
+        <field name="model">academy.course</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group string="Main Info">
+                            <field name="name"/>
+                            <field name="level"/>
+                            <field name="code"/>
+                        </group>
+                        <group string="Secondary Info">
+                            <field name="price"/>
+                            <field name="currency_id"/>
+                            <field name="duration_hours"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page name="internal_notes" string="Notes">
+                            <field name="description" placeholder="Internal notes..."/>
+                            <group name="description"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_academy_course_search" model="ir.ui.view">
+        <field name="name">academy.course.search</field>
+        <field name="model">academy.course</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="code"/>
+                <field name="level"/>
+                <filter name="active" string="Active"
+                        domain="[('active', '=', True)]"/>
+                <filter name="archive" string="Archived"
+                        domain="[('active', '=', False)]"/>
+                <filter name="odoo_basic" string="Basic Odoo Course"
+                        domain="[('level', '=', 'beginner'),('name', 'ilike', 'Odoo')]"/>
+                <filter name="odoo_advance" string="Advance Odoo Course"
+                        domain="[('level', '=', 'advanced'),('name', 'ilike', 'Odoo')]"/>
+                <group>
+                    <filter name="grp_level" string="Level"
+                            context="{'group_by':'level'}"/>
+                    <filter name="grp_currency" string="Currency"
+                            context="{'group_by':'currency_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_academy_course" model="ir.actions.act_window">
+        <field name="name">Courses</field>
+        <field name="res_model">academy.course</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{"search_default_grp_currency" : True,}</field>
+    </record>
+
+</odoo>

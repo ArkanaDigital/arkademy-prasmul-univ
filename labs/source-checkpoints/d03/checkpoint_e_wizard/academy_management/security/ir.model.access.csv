@@ -1,0 +1,12 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_course_user,academy.course.user,model_academy_course,academy_management.academy_group_user,1,0,0,0
+access_course_manager,academy.course.mgr,model_academy_course,academy_management.academy_group_manager,1,1,1,1
+access_student_user,academy.student.user,model_academy_student,academy_management.academy_group_user,1,1,1,0
+access_student_manager,academy.student.mgr,model_academy_student,academy_management.academy_group_manager,1,1,1,1
+access_batch_user,academy.batch.user,model_academy_batch,academy_management.academy_group_user,1,0,0,0
+access_batch_manager,academy.batch.mgr,model_academy_batch,academy_management.academy_group_manager,1,1,1,1
+access_enrollment_user,academy.enrollment.user,model_academy_enrollment,academy_management.academy_group_user,1,1,1,0
+access_enrollment_manager,academy.enrollment.mgr,model_academy_enrollment,academy_management.academy_group_manager,1,1,1,1
+access_course_tag_user,academy.course_tag.user,model_academy_course_tag,academy_management.academy_group_user,1,0,0,0
+access_course_tag_manager,academy.course_tag.mgr,model_academy_course_tag,academy_management.academy_group_manager,1,1,1,1
+access_reject_wizard_user,reject.wizard.user,model_academy_enrollment_reject_wizard,academy_management.academy_group_user,1,1,1,1
