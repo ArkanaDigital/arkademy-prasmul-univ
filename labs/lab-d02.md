@@ -261,6 +261,61 @@ Buat `views/academy_batch_views.xml` dan `views/academy_enrollment_views.xml` (l
 
 Jangan lupa daftarkan file view baru di manifest, **sebelum** `academy_menus.xml`.
 
+```
+    <record id="view_academy_batch_list" model="ir.ui.view">
+        <field name="name">academy.batch.list</field>
+        <field name="model">academy.batch</field>
+        <field name="arch" type="xml">
+            <list string="batch">
+                <field name="name"/>
+                <field name="code"/>
+                <field name="course_id"/>
+                <field name="start_date"/>
+                <field name="end_date"/>
+                <field name="capacity"/>
+                <field name="state"/>
+                <field name="responsible_id"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_academy_batch_form" model="ir.ui.view">
+        <field name="name">academy.batch.form</field>
+        <field name="model">academy.batch</field>
+        <field name="arch" type="xml">
+            <form string="batch">
+                <header>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="code"/>
+                            <field name="course_id"/>
+                            <field name="start_date"/>
+                            <field name="end_date"/>
+                            <!-- <field name="state"/> -->
+                        </group>
+                        <group>
+                            <field name="capacity"/>
+                            <field name="responsible_id"/>
+                            <field name="active"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Enrollment">
+                            <field name="enrollment_ids"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+```
+
 ## Step 6 — Upgrade
 
 ```bash
