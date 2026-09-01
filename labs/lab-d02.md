@@ -262,6 +262,7 @@ Buat `views/academy_batch_views.xml` dan `views/academy_enrollment_views.xml` (l
 Jangan lupa daftarkan file view baru di manifest, **sebelum** `academy_menus.xml`.
 
 ```
+    <!-- list view dan form view untuk batch -->
     <record id="view_academy_batch_list" model="ir.ui.view">
         <field name="name">academy.batch.list</field>
         <field name="model">academy.batch</field>
@@ -308,6 +309,49 @@ Jangan lupa daftarkan file view baru di manifest, **sebelum** `academy_menus.xml
                     <notebook>
                         <page string="Enrollment">
                             <field name="enrollment_ids"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- list view dan form view untuk enrollment -->
+    <record id="view_academy_enrollment_list" model="ir.ui.view">
+        <field name="name">academy.enrollment.list</field>
+        <field name="model">academy.enrollment</field>
+        <field name="arch" type="xml">
+            <list string="enrollment">
+                <field name="name"/>
+                <field name="batch_id"/>
+                <field name="student_id"/>
+                <field name="enrollment_date"/>
+                <field name="state"/>
+                <field name="notes"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_academy_enrollment_form" model="ir.ui.view">
+        <field name="name">academy.enrollment.form</field>
+        <field name="model">academy.enrollment</field>
+        <field name="arch" type="xml">
+            <form string="enrollment">
+                <header>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <field name="batch_id"/>
+                        <field name="student_id"/>
+                        <field name="enrollment_date"/>
+                    </group>
+                    <notebook>
+                        <page name="notes" string="Note">
+                            <field name="notes"/>
                         </page>
                     </notebook>
                 </sheet>
