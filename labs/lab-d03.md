@@ -695,6 +695,107 @@ Belum punya group **Internal User** (`base.group_user`).
 
 ---
 
+# Improvisasi Hari ke-3 dan Q&A
+
+Checkpoint di atas adalah target inti lab. Implementasi boleh berkembang selama
+perubahan tambahannya tetap dicatat dan diuji. Bagian ini mendokumentasikan
+improvisasi yang sudah dibuat pada workspace training.
+
+Snapshot source lengkap tersedia di
+`source-checkpoints/d03/checkpoint_improvement_on_class/academy_management`.
+Checkpoint ini dibuat terpisah agar `checkpoint_final_day3` tetap menjadi
+baseline resmi lab.
+
+## Improvisasi yang Sudah Dikerjakan
+
+### Batch lebih praktis untuk penggunaan harian
+
+Di models/academy_batch.py:
+
+- course_id memiliki default ke course pertama yang tersedia.
+- code dibuat otomatis dari kode course dan tanggal, misalnya
+  PY-101-20260902.
+- Domain course membatasi pilihan ke level beginner dan intermediate.
+- capacity memiliki default 20.
+- Saat start_date diisi, end_date otomatis menjadi tiga hari setelahnya.
+- Field enrollment_count dan available_seats ditampilkan di form.
+
+Ini adalah convenience untuk mempercepat input data training. Untuk production,
+default course pertama dan kode berbasis tanggal perlu ditinjau kembali karena
+beberapa batch pada course yang sama di hari yang sama tetap menghasilkan kode
+yang bentrok; SQL constraint akan menolak duplikat tersebut.
+
+### Enrollment memiliki informasi batch yang lebih lengkap
+
+Di models/academy_enrollment.py, ditambahkan related field tersimpan untuk
+menampilkan batch_code, batch_capacity, batch_start_date, batch_end_date, dan
+responsible_email. Data tersebut ditampilkan pada tab Batch Info agar user tidak
+perlu membuka record Batch terpisah.
+
+Enrollment juga memakai mail.thread, field audit approval, validasi kapasitas
+saat state menjadi confirmed, dan pengecekan duplikasi student dalam batch.
+
+### Security dan validasi tambahan
+
+Implementasi sudah memiliki empat group, access rights per model, serta record
+rule untuk membatasi user ke batch yang menjadi tanggung jawabnya. Constraint
+kapasitas juga dipasang pada perubahan kapasitas dan relasi enrollment.
+
+## Gap terhadap Checklist Resmi Day 3
+
+Per 2 September 2026, implementasi workspace belum menyelesaikan semua target
+checkpoint resmi:
+
+| Area | Status | Catatan |
+|---|---|---|
+| SQL/Python constraint | Selesai secara source | Tetap perlu dibuktikan lewat uji ORM dan SQL langsung |
+| State dan audit enrollment | Sebagian besar selesai | Tombol approval belum diberi groups |
+| Hak approval Python | Belum selesai | has_group() pada action_manager_approve dan action_final_approve masih dikomentari |
+| Advanced list enrollment | Belum selesai | Belum ada decoration, optional column, badge, dan inline Submit |
+| Calendar Batch | Belum selesai | Belum ada calendar view dan calendar pada view_mode |
+| Advanced search enrollment | Belum selesai | Belum ada filter_domain, filter default, group by lengkap, dan search panel |
+| Security record rules | Sudah ditulis | Masih perlu diuji dengan user asli, bukan admin |
+| Rejection workflow | Belum selesai | State rejected ada, tetapi action/wizard reject belum ada di workspace |
+
+Jangan menandai item sebagai selesai hanya karena source file sudah ada. Item
+security dan constraint dianggap selesai setelah diuji pada database training.
+
+## Q&A Implementasi
+
+### Mengapa constraint Batch memakai capacity dan enrollment_ids?
+
+Karena aturan kapasitas dapat dilanggar dari dua arah: kapasitas diturunkan,
+atau enrollment berubah. Constraint pada model academy.enrollment tetap
+diperlukan ketika state enrollment berubah menjadi confirmed.
+
+### Mengapa groups pada tombol belum cukup?
+
+groups hanya mengatur tampilan tombol di UI. Method masih dapat dipanggil
+melalui RPC atau shell. Karena itu has_group() wajib aktif di Python untuk
+approval L1 dan L2.
+
+### Mengapa related field memakai store=True?
+
+Supaya field bisa dicari, diurutkan, atau dipakai pada view tanpa menghitung
+ulang setiap kali dibaca. Konsekuensinya, field menjadi kolom database dan akan
+ikut diperbarui ketika data Batch berubah.
+
+### Apakah state rejected sudah berarti fitur reject selesai?
+
+Belum. State baru menjadi alur lengkap jika ada action yang memindahkan record
+ke rejected, meminta alasan penolakan, membatasi siapa yang boleh menolak, dan
+menyediakan jalan kembali ke draft. Wizard reject adalah pengembangan lanjutan
+yang disediakan pada checkpoint berikutnya.
+
+### Apa yang harus dikerjakan berikutnya?
+
+1. Kembalikan advanced list, calendar, dan advanced search dari Checkpoint C
+   tanpa menghapus field improvisasi.
+2. Aktifkan has_group() dan tambahkan groups pada tombol approval.
+3. Jalankan uji login sebagai Academy User, Approval L1, Approval L2, dan
+   Manager.
+4. Catat hasil uji constraint dan security pada checklist di bawah.
+
 # Final Checklist Day 3
 
 | Item | Status |

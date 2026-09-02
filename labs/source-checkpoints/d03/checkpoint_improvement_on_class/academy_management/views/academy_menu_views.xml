@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_academy_root" name="Academy" sequence="10"/>
+
+    <menuitem id="menu_academy_course" name="Courses"
+              parent="menu_academy_root"
+              action="action_academy_course" sequence="10"/>
+    <menuitem id="menu_academy_student" name="Students"
+              parent="menu_academy_root"
+              action="action_academy_student" sequence="20"/>
+    <menuitem id="menu_academy_batch" name="Batch"
+              parent="menu_academy_root"
+              action="action_academy_batch" sequence="20"/>
+    <menuitem id="menu_academy_enrollment" name="Enrollment"
+              parent="menu_academy_root"
+              action="action_academy_enrollment" sequence="20"/>
+</odoo>

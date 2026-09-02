@@ -1,0 +1,31 @@
+<odoo>
+    <record id="module_category_academy" model="ir.module.category">
+        <field name="name">Academy</field>
+    </record>
+
+    <record id="academy_group_user" model="res.groups">
+        <field name="name">Academy User</field>
+        <field name="category_id" ref="academy_management.module_category_academy"/>
+    </record>
+
+    <record id="academy_group_approval_l1" model="res.groups">
+        <field name="name">Academy Approval Level 1</field>
+        <field name="category_id" ref="academy_management.module_category_academy"/>
+        <field name="implied_ids" eval="[(4, ref('academy_group_user'))]"/>
+    </record>
+
+    <record id="academy_group_approval_l2" model="res.groups">
+        <field name="name">Academy Approval Level 2</field>
+        <field name="category_id" ref="academy_management.module_category_academy"/>
+        <field name="implied_ids" eval="[(4, ref('academy_group_user'))]"/>
+    </record>
+
+    <record id="academy_group_manager" model="res.groups">
+        <field name="name">Academy Manager</field>
+        <field name="category_id" ref="academy_management.module_category_academy"/>
+        <field name="implied_ids"
+               eval="[(4, ref('academy_group_user')),
+                      (4, ref('academy_group_approval_l1')),
+                      (4, ref('academy_group_approval_l2'))]"/>
+    </record>
+</odoo>

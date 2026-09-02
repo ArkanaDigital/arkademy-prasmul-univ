@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_academy_course_form_inherit" model="ir.ui.view">
+        <field name="name">academy.course.form.inherit</field>
+        <field name="model">academy.course</field>
+        <field name="inherit_id" ref="academy_management.view_academy_course_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='level']" position="after">
+                <field name="is_published"/>
+                <field name="tag_ids" widget="many2many_tags"
+                       options="{'color_field': 'color'}"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

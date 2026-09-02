@@ -8,7 +8,7 @@ Snapshot kode modul di setiap titik lab. Gunanya **satu**: peserta yang tertingg
 |---|---|
 | **d01** | `a_module_only` → `b_models_ready` → `c_final` |
 | **d02** | `a_custom_views` → `b_relations` → `c_inheritance` → `d_computed_onchange` → `final_day2` |
-| **d03** | `a_constraints` → `b_state_approval` → `c_approval_monitoring_views` → `d_security_for_approval` → `e_wizard` → `final_day3` |
+| **d03** | `a_constraints` → `b_state_approval` → `c_approval_monitoring_views` → `d_security_for_approval` → `e_wizard` → `final_day3`; `checkpoint_improvement_on_class` (snapshot improvement kelas) |
 | **d04** | `a_pdf_report` → `b_report_inheritance` → `c_excel_export` → `d_rest_api_consumer` → `e_external_api` → `final_day4` |
 | **d05** | `a_controller_basics` → `b_get_courses` → `c_get_course_detail` → `d_post_enrollment_request` → `e_api_key_boundary` → `final_day5` |
 

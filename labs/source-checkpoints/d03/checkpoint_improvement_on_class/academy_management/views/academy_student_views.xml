@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_academy_student_list" model="ir.ui.view">
+        <field name="name">academy.student.list</field>
+        <field name="model">academy.student</field>
+        <field name="arch" type="xml">
+            <list string="Student">
+                <!-- name, email, phone, gender -->
+                <field name="name"/>
+                <field name="email"/>
+                <field name="phone"/>
+                <field name="gender"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_academy_student_form" model="ir.ui.view">
+        <field name="name">academy.student.form</field>
+        <field name="model">academy.student</field>
+        <field name="arch" type="xml">
+            <form string="Student">
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" placeholder="Nama Student"/></h1>
+                    </div>
+                    <group>
+                        <group string="Kontak">
+                            <field name="email" required="1"/>
+                            <field name="phone"/>
+                            <field name="active"/>
+                        </group>
+                        <group string="Profil">
+                            <field name="birthdate"/>
+                            <field name="gender"/>
+                        </group>
+                    </group>
+                    <div>
+                        <p>ini paragraf</p>
+                    </div>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_academy_student_search" model="ir.ui.view">
+        <field name="name">academy.student.search</field>
+        <field name="model">academy.student</field>
+        <field name="arch" type="xml">
+            <search string="Cari Student">
+                <field name="name"/>
+                <field name="email"/>
+                <field name="phone"/>
+                <filter name="gender_male" string="Male"
+                        domain="[('gender','=','male')]"/>
+                <filter name="gender_female" string="Female"
+                        domain="[('gender','=','female')]"/>
+                <filter name="gender_other" string="Other"
+                        domain="[('gender','=','other')]"/>
+                <separator/>
+                <group expand="0" string="Group By">
+                    <filter name="group_gender" string="Gender"
+                            context="{'group_by': 'gender'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_academy_student" model="ir.actions.act_window">
+        <field name="name">Students</field>
+        <field name="res_model">academy.student</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

@@ -1,0 +1,29 @@
+<odoo>
+    <record id="batch_rule_user_own" model="ir.rule">
+        <field name="name">Academy User: hanya batch sendiri</field>
+        <field name="model_id" ref="model_academy_batch"/>
+        <field name="groups" eval="[(4, ref('academy_group_user'))]"/>
+        <field name="domain_force">[('responsible_id', '=', user.id)]</field>
+    </record>
+
+    <record id="batch_rule_manager_all" model="ir.rule">
+        <field name="name">Academy Manager: semua batch</field>
+        <field name="model_id" ref="model_academy_batch"/>
+        <field name="groups" eval="[(4, ref('academy_group_manager'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+
+    <record id="enrollment_rule_user_own" model="ir.rule">
+        <field name="name">Academy User: enrollment di batch sendiri</field>
+        <field name="model_id" ref="model_academy_enrollment"/>
+        <field name="groups" eval="[(4, ref('academy_group_user'))]"/>
+        <field name="domain_force">[('batch_id.responsible_id', '=', user.id)]</field>
+    </record>
+
+    <record id="enrollment_rule_manager_all" model="ir.rule">
+        <field name="name">Academy Manager: semua enrollment</field>
+        <field name="model_id" ref="model_academy_enrollment"/>
+        <field name="groups" eval="[(4, ref('academy_group_manager'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+</odoo>
