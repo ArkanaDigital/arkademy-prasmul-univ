@@ -387,11 +387,94 @@ Tambahkan xpath kedua di template yang sama:
 
 > Kalau anchor ini tidak ketemu di versi Anda, baca `arch` aslinya dan pilih elemen lain. Jangan menebak.
 
+## Class Improvement — Tampilkan Detail Pembayaran Invoice
+
+Report Sale Order dapat menampilkan ringkasan invoice terkait tanpa memuat
+`account.report_invoice_document`. Data invoice sudah tersedia melalui
+`doc.invoice_ids`, sehingga cukup di-loop langsung pada template Sale Order.
+
+Tambahkan blok berikut di dalam xpath `//div[hasclass('page')]`, setelah catatan
+Academy:
+
+```xml
+            <t t-set="invoices"
+               t-value="doc.invoice_ids.filtered(lambda invoice: invoice.move_type == 'out_invoice' and invoice.state != 'cancel').sorted(lambda invoice: (invoice.invoice_date or invoice.date, invoice.name or ''))"/>
+            <div t-if="invoices" class="mt-4" name="invoice_payment_summary">
+                <h5>Ringkasan Pembayaran Invoice</h5>
+                <table class="table table-sm table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Invoice</th>
+                            <th>Tanggal</th>
+                            <th class="text-end">Total Tagihan</th>
+                            <th class="text-end">Sudah Dibayar</th>
+                            <th class="text-end">Sisa Tagihan</th>
+                            <th>Status Pembayaran</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr t-foreach="invoices" t-as="invoice">
+                            <td><span t-field="invoice.name"/></td>
+                            <td><span t-field="invoice.invoice_date"/></td>
+                            <td class="text-end">
+                                <span t-field="invoice.amount_total"
+                                      t-options="{'widget': 'monetary', 'display_currency': invoice.currency_id}"/>
+                            </td>
+                            <td class="text-end">
+                                <span t-out="invoice.amount_total - invoice.amount_residual"
+                                      t-options="{'widget': 'monetary', 'display_currency': invoice.currency_id}"/>
+                            </td>
+                            <td class="text-end">
+                                <span t-field="invoice.amount_residual"
+                                      t-options="{'widget': 'monetary', 'display_currency': invoice.currency_id}"/>
+                            </td>
+                            <td><span t-field="invoice.payment_state"/></td>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr class="fw-bold">
+                            <td colspan="2">Total</td>
+                            <td class="text-end">
+                                <span t-out="sum(invoices.mapped('amount_total'))"
+                                      t-options="{'widget': 'monetary', 'display_currency': doc.currency_id}"/>
+                            </td>
+                            <td class="text-end">
+                                <span t-out="sum(invoices.mapped('amount_total')) - sum(invoices.mapped('amount_residual'))"
+                                      t-options="{'widget': 'monetary', 'display_currency': doc.currency_id}"/>
+                            </td>
+                            <td class="text-end">
+                                <span t-out="sum(invoices.mapped('amount_residual'))"
+                                      t-options="{'widget': 'monetary', 'display_currency': doc.currency_id}"/>
+                            </td>
+                            <td/>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+```
+
+Yang dilakukan script tersebut:
+
+- hanya mengambil customer invoice (`out_invoice`) yang tidak dibatalkan;
+- mengurutkan invoice berdasarkan tanggal, lalu nomor invoice;
+- menghitung nilai dibayar dari `amount_total - amount_residual`;
+- memakai widget `monetary` agar nilai mengikuti currency invoice;
+- menyembunyikan seluruh tabel ketika SO belum mempunyai invoice.
+
+Gunakan `t-field` untuk field record seperti `invoice.amount_total`. Gunakan
+`t-out` untuk ekspresi hasil perhitungan, misalnya jumlah yang sudah dibayar dan
+total pada footer.
+
 ## Step 5 — Upgrade dan Uji
 
 1. Buat satu Sales Order
 2. **Print → Quotation** → catatan Academy muncul di bawah
 3. Tabel item berubah gaya sesuai atribut baru
+4. Cetak SO tanpa invoice → ringkasan pembayaran tidak tampil
+5. Buat draft invoice → invoice tampil dengan pembayaran nol
+6. Register pembayaran sebagian → kolom Dibayar dan Sisa Tagihan berubah
+7. Lunasi invoice → Sisa Tagihan menjadi nol dan status menjadi Paid
+8. Batalkan invoice → invoice tersebut tidak lagi tampil pada ringkasan
 
 ## Step 6 — Buktikan Tidak Merusak Dokumen Lain
 
@@ -411,6 +494,9 @@ Install lagi setelah selesai menguji.
 
 - [ ] Catatan Academy muncul di Quotation
 - [ ] Atribut tabel berubah sesuai xpath
+- [ ] Ringkasan pembayaran tampil ketika SO mempunyai invoice
+- [ ] Nilai dibayar dan sisa tagihan sesuai dengan invoice
+- [ ] Invoice cancelled tidak tampil pada ringkasan
 - [ ] Report bawaan lain tidak terpengaruh
 - [ ] Uninstall mengembalikan report seperti semula
 - [ ] Tidak ada file di `odoo/addons/` yang diedit
@@ -620,6 +706,13 @@ Atribut `filename="file_name"` belum dipasang di field Binary.
 
 Bungkus tambahan dengan `t-if` supaya hanya berlaku untuk dokumen yang relevan. Selalu uji dengan dokumen yang tidak berasal dari modul Anda.
 
+## 10. Detail pembayaran invoice tidak tampil
+
+Pastikan SO sudah mempunyai invoice dan invoice tersebut bukan customer credit
+note atau invoice berstatus Cancelled. Jangan memanggil
+`account.report_invoice_document`; untuk tabel ringkasan cukup gunakan relasi
+`doc.invoice_ids`.
+
 ---
 
 # Final Checklist Day 4
@@ -640,6 +733,9 @@ Bungkus tambahan dengan `t-if` supaya hanya berlaku untuk dokumen yang relevan. 
 | Paham `t-field` vs `t-esc` | ☐ |
 | Report Sale Order bawaan berubah | ☐ |
 | Atribut tabel berubah via `position="attributes"` | ☐ |
+| Ringkasan pembayaran invoice tampil pada SO yang memiliki invoice | ☐ |
+| Total dibayar dan sisa tagihan sesuai dengan invoice | ☐ |
+| Invoice cancelled tidak tampil pada ringkasan | ☐ |
 | Report bawaan lain tidak terpengaruh | ☐ |
 | Uninstall mengembalikan report semula | ☐ |
 | Wizard export Excel berfungsi | ☐ |
