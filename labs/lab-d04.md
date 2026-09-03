@@ -581,6 +581,126 @@ class EnrollmentExportWizard(models.TransientModel):
 
 Tambahkan ke `wizards/__init__.py`.
 
+### Class Improvement — Worksheet `enrollment by sql`
+
+Sebagai variasi, buat worksheet kedua yang mengambil data memakai raw SQL.
+Worksheet ini sengaja dibuat berbeda dari `Enrollments` agar perbandingan ORM
+dan SQL mudah terlihat.
+
+Tambahkan helper berikut sebelum `action_export()`:
+
+```python
+    def _get_enrollments_by_sql(self, enrollment_ids):
+        """Return enrollment report rows using a parameterized SQL query."""
+        if not enrollment_ids:
+            return []
+
+        self.env.cr.execute(
+            """
+                SELECT
+                    enrollment.id AS enrollment_id,
+                    enrollment.name AS enrollment,
+                    student.name AS student,
+                    student.email AS student_email,
+                    course.code AS course_code,
+                    course.name AS course,
+                    batch.code AS batch_code,
+                    batch.name AS batch,
+                    enrollment.enrollment_date AS enrollment_date,
+                    CASE enrollment.state
+                        WHEN 'draft' THEN 'Draft'
+                        WHEN 'submitted' THEN 'Menunggu Approval'
+                        WHEN 'manager_approved' THEN 'Approved Level 1'
+                        WHEN 'confirmed' THEN 'Confirmed'
+                        WHEN 'done' THEN 'Selesai'
+                        WHEN 'rejected' THEN 'Ditolak'
+                        WHEN 'cancelled' THEN 'Dibatalkan'
+                        ELSE enrollment.state
+                    END AS state_label
+                FROM academy_enrollment AS enrollment
+                JOIN academy_student AS student
+                    ON student.id = enrollment.student_id
+                JOIN academy_batch AS batch
+                    ON batch.id = enrollment.batch_id
+                JOIN academy_course AS course
+                    ON course.id = batch.course_id
+                WHERE enrollment.id = ANY(%s)
+                ORDER BY enrollment.enrollment_date, enrollment.id
+            """,
+            (enrollment_ids,),
+        )
+        return self.env.cr.dictfetchall()
+```
+
+Di `action_export()`, setelah loop worksheet `Enrollments`, tambahkan:
+
+```python
+        # IDs berasal dari ORM agar access rights dan record rules
+        # tetap menjadi batas data yang boleh diekspor.
+        sql_records = self._get_enrollments_by_sql(records.ids)
+
+        sql_sheet = workbook.add_worksheet("enrollment by sql")
+        sql_title = workbook.add_format({
+            "bold": True,
+            "font_color": "#FFFFFF",
+            "bg_color": "#1F4E78",
+            "align": "center",
+        })
+        sql_header = workbook.add_format({
+            "bold": True,
+            "bg_color": "#D9EAF7",
+            "border": 1,
+        })
+        sql_row = workbook.add_format({"border": 1})
+        sql_headers = [
+            "DB ID", "Enrollment", "Student", "Email", "Course Code",
+            "Course", "Batch Code", "Batch", "Tanggal", "Status SQL",
+        ]
+
+        sql_sheet.merge_range(
+            0, 0, 0, len(sql_headers) - 1,
+            "ENROLLMENT REPORT - RAW SQL RESULT",
+            sql_title,
+        )
+        for col, header in enumerate(sql_headers):
+            sql_sheet.write(1, col, header, sql_header)
+        sql_sheet.set_column(0, 0, 10)
+        sql_sheet.set_column(1, 2, 20)
+        sql_sheet.set_column(3, 3, 28)
+        sql_sheet.set_column(4, 8, 18)
+        sql_sheet.set_column(9, 9, 22)
+        sql_sheet.freeze_panes(2, 0)
+        sql_sheet.autofilter(
+            1, 0, max(len(sql_records) + 1, 1), len(sql_headers) - 1)
+
+        for row, enrollment in enumerate(sql_records, start=2):
+            sql_sheet.write(row, 0, enrollment["enrollment_id"], sql_row)
+            sql_sheet.write(row, 1, enrollment["enrollment"] or "", sql_row)
+            sql_sheet.write(row, 2, enrollment["student"] or "", sql_row)
+            sql_sheet.write(row, 3, enrollment["student_email"] or "", sql_row)
+            sql_sheet.write(row, 4, enrollment["course_code"] or "", sql_row)
+            sql_sheet.write(row, 5, enrollment["course"] or "", sql_row)
+            sql_sheet.write(row, 6, enrollment["batch_code"] or "", sql_row)
+            sql_sheet.write(row, 7, enrollment["batch"] or "", sql_row)
+            sql_sheet.write(
+                row, 8, str(enrollment["enrollment_date"] or ""), sql_row)
+            sql_sheet.write(row, 9, enrollment["state_label"] or "", sql_row)
+```
+
+Perbedaan hasilnya:
+
+- worksheet ORM tetap bernama `Enrollments` dengan enam kolom sederhana;
+- worksheet SQL bernama `enrollment by sql` dengan judul biru dan autofilter;
+- SQL menambahkan DB ID, email student, course code, dan batch code;
+- SQL mengubah kode state menjadi label melalui `CASE`;
+- query tetap memakai parameter `%s`, bukan string concatenation;
+- `records.ids` berasal dari pencarian ORM sehingga record rule user tetap
+  dihormati meskipun data akhirnya dibaca menggunakan SQL.
+
+> Raw SQL melewati mekanisme domain ORM. Karena itu, jangan mengambil semua
+> data langsung dari database tanpa lebih dulu membatasi ID yang boleh diakses
+> user.
+
 ## Step 2 — View Wizard
 
 `wizards/enrollment_export_wizard_views.xml`:
@@ -641,8 +761,11 @@ Daftarkan view wizard di manifest, dan tambahkan:
 2. Isi rentang tanggal dan/atau batch → **Export**
 3. Dialog terbuka lagi, sekarang ada tautan file
 4. Klik → `enrollments.xlsx` terunduh dengan nama yang benar
-5. Buka file → header bold, kolom lebar, baris terkunci saat di-scroll
-6. Ulangi tanpa filter apa pun → semua enrollment ikut
+5. Buka sheet `Enrollments` → output ORM tampil seperti biasa
+6. Buka sheet `enrollment by sql` → output SQL memiliki kolom dan style berbeda
+7. Gunakan autofilter pada `Status SQL` atau `Course Code`
+8. Ulangi tanpa filter apa pun → kedua sheet berisi dataset yang sama
+9. Bandingkan jumlah baris dan pastikan DB ID SQL cocok dengan record ORM
 
 ## Step 5 — Perhatikan Pola Dua Langkah
 
@@ -661,6 +784,9 @@ Method-nya membuka ulang wizard yang sama (`res_id: self.id`), jadi record trans
 - [ ] Filter tanggal dan batch mempengaruhi isi file
 - [ ] File terunduh dengan nama `enrollments.xlsx`
 - [ ] Header bold, kolom lebar, freeze panes bekerja
+- [ ] Sheet `enrollment by sql` memiliki kolom tambahan dan style berbeda
+- [ ] Query SQL memakai parameter binding dan helper method terpisah
+- [ ] Hasil ORM dan SQL memiliki record yang sama
 - [ ] Tombol Export hilang setelah file dibuat
 - [ ] Tanpa filter, semua enrollment ikut ter-export
 
