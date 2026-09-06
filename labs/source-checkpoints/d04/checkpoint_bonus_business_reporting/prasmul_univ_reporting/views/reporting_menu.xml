@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <menuitem id="menu_business_reporting_root"
+    <menuitem id="menu_business_reporting_group"
               name="Business Reporting"
+              parent="account.menu_finance_reports"
               groups="group_business_reporting_user"
-              sequence="45"/>
+              sequence="90"/>
 </odoo>

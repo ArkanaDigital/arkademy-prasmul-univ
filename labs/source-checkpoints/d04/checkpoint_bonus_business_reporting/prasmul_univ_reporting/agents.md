@@ -2,9 +2,9 @@
 
 ## Tujuan
 
-Menyediakan menu utama `Business Reporting`, grup akses khusus, serta helper
-`prasmul.xlsx.report.mixin` untuk format XLSX, validasi filter, dan unduhan file
-dari wizard sementara.
+Menyediakan grup menu **Business Reporting** di bawah Accounting → Reporting, grup
+akses khusus, serta helper `prasmul.xlsx.report.mixin` untuk format XLSX, validasi
+filter, dan unduhan file dari wizard sementara.
 
 ## Batas tanggung jawab
 
@@ -14,7 +14,7 @@ tersebut menjadi tanggung jawab addon seperti `prasmul_univ_reporting_lkps` dan
 
 ## Skenario pengujian
 
-- Hanya pengguna dalam `group_business_reporting_user` yang melihat menu utama.
+- Hanya pengguna dalam `group_business_reporting_user` yang melihat menu laporan.
 - Rentang tanggal tidak valid dan company tanpa hak akses harus ditolak.
 - File hasil dibuat melalui field binary pada transient wizard.
 

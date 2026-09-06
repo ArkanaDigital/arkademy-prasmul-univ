@@ -7,7 +7,7 @@ project nyata dan tidak wajib diselesaikan seluruhnya di kelas.
 ## Isi checkpoint
 
 ```text
-prasmul_univ_reporting          fondasi menu, keamanan, dan helper XLSX
+prasmul_univ_reporting          fondasi keamanan dan helper XLSX
 prasmul_univ_reporting_lkps     contoh laporan finansial LKPS parsial
 prasmul_univ_reporting_tax      contoh laporan operasional pajak
 ```
@@ -23,7 +23,8 @@ membutuhkan addon core `prasmul_univ_reporting`.
 4. Install addon LKPS parsial dan/atau operasional pajak.
 5. Berikan grup **Pengguna Business Reporting** kepada pengguna.
 6. Pastikan pengguna juga memiliki hak baca Accounting.
-7. Buka menu **Business Reporting**.
+7. Buka menu **Accounting → Reporting → Business Reporting**, lalu pilih
+   **LKPS Parsial** atau **Laporan Pajak**.
 
 ## Hubungan dengan materi Day 1–4
 

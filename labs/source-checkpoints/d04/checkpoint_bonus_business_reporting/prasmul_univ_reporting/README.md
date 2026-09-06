@@ -2,9 +2,9 @@
 
 Fondasi bersama untuk laporan bisnis kustom pada project pelatihan.
 
-Addon ini sengaja hanya berisi menu utama **Business Reporting**, grup akses
-pelaporan, serta bantuan XLSX yang dapat digunakan kembali. Laporan untuk kebutuhan
-bisnis tertentu ditempatkan dalam addon terpisah yang bergantung pada modul ini.
+Addon ini menyediakan grup akses pelaporan serta bantuan XLSX yang dapat digunakan
+kembali. Laporan untuk kebutuhan bisnis tertentu ditempatkan dalam addon terpisah
+yang bergantung pada modul ini.
 
 Berikan grup **Pengguna Business Reporting** kepada pengguna sebelum mereka membuka
 menu laporan.
@@ -15,7 +15,8 @@ menu laporan.
 2. Berikan grup **Pengguna Business Reporting** kepada pengguna yang boleh mencetak
    laporan.
 3. Install addon laporan yang membutuhkan fondasi ini.
-4. Menu laporan tambahan akan muncul di bawah **Business Reporting**.
+4. Menu setiap addon laporan tersedia pada
+   **Accounting → Reporting → Business Reporting**.
 
 ## Istilah penting
 

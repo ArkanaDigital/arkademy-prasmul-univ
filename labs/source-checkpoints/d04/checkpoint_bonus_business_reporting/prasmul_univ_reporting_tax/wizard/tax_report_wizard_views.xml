@@ -32,7 +32,7 @@
 
     <menuitem id="menu_tax_report"
               name="Laporan Pajak"
-              parent="prasmul_univ_reporting.menu_business_reporting_root"
+              parent="prasmul_univ_reporting.menu_business_reporting_group"
               action="action_tax_report_wizard"
               groups="prasmul_univ_reporting.group_business_reporting_user"
               sequence="20"/>

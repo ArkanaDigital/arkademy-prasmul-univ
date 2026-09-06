@@ -32,7 +32,7 @@
 
     <menuitem id="menu_lkps_report"
               name="LKPS Parsial"
-              parent="prasmul_univ_reporting.menu_business_reporting_root"
+              parent="prasmul_univ_reporting.menu_business_reporting_group"
               action="action_lkps_report_wizard"
               groups="prasmul_univ_reporting.group_business_reporting_user"
               sequence="10"/>

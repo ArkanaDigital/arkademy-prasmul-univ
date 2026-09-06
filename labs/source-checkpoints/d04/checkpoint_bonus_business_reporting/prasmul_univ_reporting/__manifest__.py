@@ -7,12 +7,11 @@
     "author": "PT Arkana Solusi Digital",
     "website": "https://arkana.co.id",
     "license": "LGPL-3",
-    "depends": ["base"],
+    "depends": ["account"],
     "external_dependencies": {"python": ["xlsxwriter"]},
     "data": [
         "security/reporting_security.xml",
         "views/reporting_menu.xml",
     ],
-    "application": True,
     "installable": True,
 }
