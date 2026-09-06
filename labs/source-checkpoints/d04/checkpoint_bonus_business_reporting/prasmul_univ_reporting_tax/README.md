@@ -23,6 +23,13 @@ menggantikan Coretax, e-Faktur, bukti potong, atau SPT resmi.
   jenis pajak.
 - `Kontrol`: informasi dasar untuk memeriksa periode dan jumlah data.
 
+## Skenario uji di database pelatihan
+
+Untuk pengujian cepat pada `v18_prasmul_dev`, gunakan periode **2026-05-01**
+sampai **2026-05-31**. Periode ini memiliki 535 baris pajak, sehingga cocok
+untuk memeriksa sheet detail, ringkasan, dan pengecekan NPWP tanpa membuat file
+terlalu besar.
+
 ## Istilah penting
 
 - **NPWP** adalah nomor identitas wajib pajak yang dibaca dari field `vat` partner

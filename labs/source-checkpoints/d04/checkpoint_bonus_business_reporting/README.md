@@ -82,7 +82,14 @@ yang lengkap cukup dipelajari sebagai referensi lanjutan.
 
 ## Checklist pengujian
 
+Skenario uji utama pada database pelatihan `v18_prasmul_dev` menggunakan periode
+**2026-05-01** sampai **2026-05-31** untuk LKPS Parsial dan Laporan Pajak. Mei
+2026 dipilih karena hasil pajaknya memiliki 535 baris: cukup kaya untuk ditinjau,
+namun tidak sebesar satu tahun penuh.
+
 - [ ] Ketiga addon dapat di-install tanpa mengubah source Odoo.
+- [ ] LKPS Parsial berhasil diekspor untuk periode 2026-05-01 s.d. 2026-05-31.
+- [ ] Laporan Pajak berhasil diekspor untuk periode 2026-05-01 s.d. 2026-05-31.
 - [ ] Menu hanya terlihat bagi pengguna yang mendapat grup reporting.
 - [ ] Tanggal awal setelah tanggal akhir ditolak.
 - [ ] Company di luar hak pengguna ditolak.

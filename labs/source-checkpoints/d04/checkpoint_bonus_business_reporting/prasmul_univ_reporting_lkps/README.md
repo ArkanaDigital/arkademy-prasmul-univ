@@ -26,6 +26,12 @@ pengabdian kepada masyarakat, atau indikator akreditasi nonfinansial lainnya.
 - `Data Sumber`: rincian agregasi akun yang menjadi sumber ringkasan.
 - `Kontrol`: angka kontrol untuk membantu pemeriksaan hasil.
 
+## Skenario uji di database pelatihan
+
+Untuk pengujian cepat pada `v18_prasmul_dev`, gunakan periode **2026-05-01**
+sampai **2026-05-31**. Periode bulanan ini membuat hasil cukup ringkas untuk
+ditinjau, tetapi tetap berisi data posted.
+
 ## Istilah penting
 
 - **LKPS** adalah Laporan Kinerja Program Studi untuk kebutuhan akreditasi. Addon
