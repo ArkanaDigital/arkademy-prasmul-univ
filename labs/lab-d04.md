@@ -794,6 +794,32 @@ Method-nya membuka ulang wizard yang sama (`res_id: self.id`), jadi record trans
 
 ---
 
+# Bonus Reference — Business Reporting
+
+Bagian ini tidak wajib dibahas langkah demi langkah di kelas. Gunakan sebagai
+referensi ketika peserta mulai mengerjakan report pada project nyata.
+
+Contoh lengkap tersedia di:
+
+```text
+source-checkpoints/d04/checkpoint_bonus_business_reporting/
+├── prasmul_univ_reporting
+├── prasmul_univ_reporting_lkps
+└── prasmul_univ_reporting_tax
+```
+
+`prasmul_univ_reporting` menyediakan menu **Business Reporting**, grup akses, dan
+helper XLSX. Dua addon lainnya menunjukkan pola report terpisah yang bergantung
+pada core tersebut. Struktur ini memungkinkan setiap peserta membuat addon report
+sendiri tanpa menggabungkan seluruh kode ke satu modul besar.
+
+Contoh LKPS hanya mencakup data finansial yang tersedia dan bukan laporan
+akreditasi lengkap. Contoh pajak merupakan laporan operasional, bukan dokumen
+pelaporan pajak resmi. Baca README pada checkpoint untuk istilah, urutan instalasi,
+batas cakupan, serta ide latihan bagi pemula.
+
+---
+
 # Common Mistakes
 
 ## 1. Wizard error `not allowed`
