@@ -1,0 +1,27 @@
+{
+  "info": {
+    "name": "Academy API — Day 5",
+    "description": "Collection untuk menguji REST API Academy Management sesuai skenario Lab Day 5.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {"key": "base_url", "value": "http://localhost:8069"},
+    {"key": "course_code", "value": "PY-101"},
+    {"key": "batch_code", "value": "PY-101-JAN"},
+    {"key": "api_key", "value": "academy-demo-key"},
+    {"key": "student_email", "value": "postman@example.test"}
+  ],
+  "item": [
+    {"name": "01 — Ping (200)", "request": {"method": "GET", "header": [], "url": "{{base_url}}/academy/api/v1/ping"}},
+    {"name": "02 — Daftar Course (200)", "request": {"method": "GET", "header": [], "url": "{{base_url}}/academy/api/v1/courses"}},
+    {"name": "03 — Detail Course Ada (200)", "request": {"method": "GET", "header": [], "url": "{{base_url}}/academy/api/v1/courses/{{course_code}}"}},
+    {"name": "04 — Detail Course Tidak Ada (404)", "request": {"method": "GET", "header": [], "url": "{{base_url}}/academy/api/v1/courses/TIDAK-ADA"}},
+    {"name": "05 — Enrollment Tanpa API Key (401)", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"student_name\": \"Postman Tanpa Key\",\n  \"student_email\": \"no-key@example.test\",\n  \"batch_code\": \"{{batch_code}}\"\n}"}, "url": "{{base_url}}/academy/api/v1/enrollment-requests"}},
+    {"name": "06 — Enrollment API Key Salah (401)", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}, {"key": "X-API-Key", "value": "salah"}], "body": {"mode": "raw", "raw": "{\n  \"student_name\": \"Postman Key Salah\",\n  \"student_email\": \"wrong-key@example.test\",\n  \"batch_code\": \"{{batch_code}}\"\n}"}, "url": "{{base_url}}/academy/api/v1/enrollment-requests"}},
+    {"name": "07 — Enrollment Valid (201)", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}, {"key": "X-API-Key", "value": "{{api_key}}"}], "body": {"mode": "raw", "raw": "{\n  \"student_name\": \"Postman Student\",\n  \"student_email\": \"{{student_email}}\",\n  \"batch_code\": \"{{batch_code}}\",\n  \"notes\": \"Dibuat dari Postman.\"\n}"}, "url": "{{base_url}}/academy/api/v1/enrollment-requests"}},
+    {"name": "08 — Enrollment Sama (200 Idempotensi)", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}, {"key": "X-API-Key", "value": "{{api_key}}"}], "body": {"mode": "raw", "raw": "{\n  \"student_name\": \"Postman Student\",\n  \"student_email\": \"{{student_email}}\",\n  \"batch_code\": \"{{batch_code}}\",\n  \"notes\": \"Dibuat dari Postman.\"\n}"}, "url": "{{base_url}}/academy/api/v1/enrollment-requests"}},
+    {"name": "09 — Field Wajib Kurang (400)", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}, {"key": "X-API-Key", "value": "{{api_key}}"}], "body": {"mode": "raw", "raw": "{\n  \"student_name\": \"Postman Tidak Lengkap\"\n}"}, "url": "{{base_url}}/academy/api/v1/enrollment-requests"}},
+    {"name": "10 — Batch Tidak Ada (404)", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}, {"key": "X-API-Key", "value": "{{api_key}}"}], "body": {"mode": "raw", "raw": "{\n  \"student_name\": \"Postman Batch Salah\",\n  \"student_email\": \"missing-batch@example.test\",\n  \"batch_code\": \"BATCH-TIDAK-ADA\"\n}"}, "url": "{{base_url}}/academy/api/v1/enrollment-requests"}},
+    {"name": "11 — JSON Rusak (400)", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}, {"key": "X-API-Key", "value": "{{api_key}}"}], "body": {"mode": "raw", "raw": "{bukan json}"}, "url": "{{base_url}}/academy/api/v1/enrollment-requests"}}
+  ]
+}

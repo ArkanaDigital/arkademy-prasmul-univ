@@ -27,6 +27,11 @@ cp -R materi/labs/source-checkpoints/d04/checkpoint_c_excel_export/academy_manag
 
 Checkpoint Day 5: `a_controller_basics` → `b_get_courses` → `c_get_course_detail` → `d_post_enrollment_request` → `e_api_key_boundary` → `final_day5`
 
+Untuk pengujian cepat melalui Postman, import collection
+`scripts/d05/academy_api_day5.postman_collection.json`. Set variable
+`course_code` dan `batch_code` sesuai data Anda. Collection ini mencakup response
+200, 201, 400, 401, dan 404, termasuk pengujian idempotensi POST.
+
 > **Ingat sepanjang hari ini:** perubahan file controller **tidak** ikut ter-reload dengan `-u`. Setiap kali mengubah `controllers/`, **restart server**.
 
 ---
