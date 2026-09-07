@@ -15,6 +15,17 @@ prasmul_univ_reporting_tax      contoh laporan operasional pajak
 Ketiga folder di atas adalah addon Odoo yang berdiri sendiri. Addon LKPS dan pajak
 membutuhkan addon core `prasmul_univ_reporting`.
 
+## Contoh output
+
+Folder `contoh-output/` berisi hasil XLSX dari database pelatihan untuk periode
+2026-05-01 sampai 2026-05-30:
+
+- `LKPS_Parsial_Universitas_Prasetiya_Mulya_20260501_20260530.xlsx`
+- `Pajak_Operasional_Universitas_Prasetiya_Mulya_20260501_20260530.xlsx`
+
+Gunakan file ini untuk mengenali struktur sheet dan membandingkan hasil export
+peserta. File tersebut adalah contoh pembelajaran, bukan dokumen pelaporan resmi.
+
 ## Urutan instalasi
 
 1. Salin ketiga folder ke direktori yang tercantum dalam `addons_path`.
