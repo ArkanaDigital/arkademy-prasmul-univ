@@ -1,0 +1,72 @@
+{
+  "info": {
+    "name": "Academy Course — JSON-RPC CRUD",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Odoo External API JSON-RPC. Jalankan Authenticate terlebih dahulu dan aktifkan cookie jar. Ini bukan REST API."
+  },
+  "variable": [
+    {"key": "base_url", "value": "http://localhost:8069"},
+    {"key": "db", "value": "odoo"},
+    {"key": "login", "value": "admin"},
+    {"key": "password", "value": "admin"},
+    {"key": "course_id", "value": ""}
+  ],
+  "item": [
+    {
+      "name": "1. Authenticate",
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "body": {"mode": "raw", "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"call\",\n  \"params\": {\"db\": \"{{db}}\", \"login\": \"{{login}}\", \"password\": \"{{password}}\"}\n}", "options": {"raw": {"language": "json"}}},
+        "url": "{{base_url}}/web/session/authenticate"
+      },
+      "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["const body = pm.response.json();", "pm.test('authenticated', () => pm.expect(body.result.uid).to.not.eql(null));"]}}]
+    },
+    {
+      "name": "2. Create course",
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "body": {"mode": "raw", "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"call\",\n  \"params\": {\n    \"model\": \"academy.course\", \"method\": \"create\",\n    \"args\": [{\"name\": \"Course via JSON-RPC\", \"code\": \"JRPC-001\", \"level\": \"beginner\"}], \"kwargs\": {}\n  }\n}", "options": {"raw": {"language": "json"}}},
+        "url": "{{base_url}}/web/dataset/call_kw/academy.course/create"
+      },
+      "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["const body = pm.response.json();", "pm.collectionVariables.set('course_id', body.result);", "pm.test('created', () => pm.expect(body.result).to.be.a('number')); "]}}]
+    },
+    {
+      "name": "3. Read (search_read)",
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "body": {"mode": "raw", "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"call\",\n  \"params\": {\"model\": \"academy.course\", \"method\": \"search_read\", \"args\": [[], [\"name\", \"code\", \"level\"]], \"kwargs\": {\"limit\": 10}}\n}", "options": {"raw": {"language": "json"}}},
+        "url": "{{base_url}}/web/dataset/call_kw/academy.course/search_read"
+      }
+    },
+    {
+      "name": "4. Update (write)",
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "body": {"mode": "raw", "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"call\",\n  \"params\": {\"model\": \"academy.course\", \"method\": \"write\", \"args\": [[{{course_id}}], {\"level\": \"advanced\"}], \"kwargs\": {}}\n}", "options": {"raw": {"language": "json"}}},
+        "url": "{{base_url}}/web/dataset/call_kw/academy.course/write"
+      }
+    },
+    {
+      "name": "4b. Read one (read by id)",
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "body": {"mode": "raw", "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"call\",\n  \"params\": {\"model\": \"academy.course\", \"method\": \"read\", \"args\": [[{{course_id}}], [\"name\", \"code\", \"level\"]], \"kwargs\": {}}\n}", "options": {"raw": {"language": "json"}}},
+        "url": "{{base_url}}/web/dataset/call_kw/academy.course/read"
+      }
+    },
+    {
+      "name": "5. Delete (unlink)",
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "body": {"mode": "raw", "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"call\",\n  \"params\": {\"model\": \"academy.course\", \"method\": \"unlink\", \"args\": [[{{course_id}}]], \"kwargs\": {}}\n}", "options": {"raw": {"language": "json"}}},
+        "url": "{{base_url}}/web/dataset/call_kw/academy.course/unlink"
+      }
+    }
+  ]
+}

@@ -1,4 +1,4 @@
-# Day 4 Hands-on Lab — Wizards & Reporting
+# Day 4 Hands-on Lab — Wizards, Reporting & Integration
 
 ## Objective
 
@@ -8,6 +8,8 @@ Di akhir lab Day 4, module `academy_management` Anda punya:
 - wizard export Excel dengan filter
 - report PDF sertifikat enrollment
 - report bawaan Odoo yang sudah di-custom tanpa menyentuh source-nya
+- wizard REST API consumer untuk import course eksternal secara idempotent
+- akses Odoo External API melalui JSON-RPC (Postman) dan XML-RPC (Python)
 
 ---
 
@@ -28,18 +30,100 @@ Cek dependency:
 
 ```bash
 python -c "import xlsxwriter; print(xlsxwriter.__version__)"   # kalau gagal: pip install xlsxwriter
+python -c "import requests; print(requests.__version__)"       # kalau gagal: pip install requests
 wkhtmltopdf --version                                          # harus 0.12.5 (with patched qt)
 ```
 
 > Versi wkhtmltopdf selain 0.12.5 patched qt akan menghasilkan PDF tanpa header/footer atau rusak.
 
-Checkpoint Day 4: `a_pdf_report` → `b_report_inheritance` → `c_excel_export` → `d_rest_api_consumer` → `e_external_api` → `final_day4`
+Checkpoint source Day 4: `a_pdf_report` → `b_report_inheritance` → `c_excel_export` → `d_rest_api_consumer` → `e_external_api` → `final_day4`.
 
-> `checkpoint_d` dan `checkpoint_e` berisi materi **Day 5**. Hari ini berhenti di `checkpoint_c_excel_export`.
+Lab ini membawa wizard reject dari Day 3 sebagai pengantar. Karena itu penamaan
+checkpoint di dokumen bergeser satu huruf setelahnya: checkpoint **E** memakai
+source `checkpoint_d_rest_api_consumer`, dan checkpoint **F** memakai source
+`checkpoint_e_external_api`.
 
 Wizard reject ada di `d03/checkpoint_e_wizard`.
 
 ---
+
+# Development Environment — Restore DB Prasmul
+
+Mulai Day 4, peserta diharapkan sudah siap mengembangkan addon menggunakan
+database salinan dari environment server Prasmul. Database ini dipakai hanya
+untuk development lokal, bukan untuk menggantikan proses deployment resmi.
+
+## Restore Database
+
+Pastikan:
+
+1. File backup `.dump` atau `.zip` dari staging/production sudah tersedia.
+2. Odoo berjalan dalam mode multi-database; konfigurasi workspace tidak boleh
+   terkunci ke satu database.
+3. Master password database Odoo diketahui.
+4. Buka `http://localhost:8069/web/database/manager`.
+5. Restore dengan nama terstruktur, misalnya `v18_prasmul_dev`.
+6. Package Python tambahan sudah terpasang.
+7. Semua addon yang dibutuhkan sudah ada di `addons_path` dan berhasil
+   diload oleh Odoo.
+8. Password user admin sudah diatur ulang untuk akses development.
+
+## Install Package Python Tambahan
+
+Gunakan Python environment yang sama dengan yang dipakai untuk menjalankan
+Odoo. Contoh:
+
+    <python-path> -m pip install python-gnupg
+
+Contoh path pada environment training:
+
+    /Users/ardianpramana/.pyenv/versions/3.12.5/envs/.env-prasmul-univ/bin/python -m pip install python-gnupg
+
+Path Python yang benar dapat dilihat pada file workspace VS Code masing-masing.
+
+## Konfigurasi Addons
+
+Pastikan `odoo.conf` memuat addon core, custom, enterprise, dan addon Prasmul.
+Contoh konfigurasi relatif:
+
+    addons_path = odoo/addons,custom-addons,enterprise,prasmul/addons_arkana,prasmul/external_addons
+
+Atau gunakan absolute path sesuai lokasi workspace:
+
+    addons_path =
+        /Users/ardianpramana/Documents/projects/arkademy-inhouse-training/arkademy-prasmul-univ/development/odoo/addons,
+        /Users/ardianpramana/Documents/projects/arkademy-inhouse-training/arkademy-prasmul-univ/development/custom-addons,
+        /Users/ardianpramana/Documents/projects/arkademy-inhouse-training/arkademy-prasmul-univ/development/enterprise,
+        /Users/ardianpramana/Documents/projects/arkademy-inhouse-training/arkademy-prasmul-univ/development/prasmul/addons_arkana,
+        /Users/ardianpramana/Documents/projects/arkademy-inhouse-training/arkademy-prasmul-univ/development/prasmul/external_addons
+
+Setelah menambahkan addon atau mengubah Python package, restart Odoo. Untuk
+perubahan XML/CSV, upgrade module yang terdampak dengan database development.
+
+## Reset Password Admin
+
+Cara yang disarankan adalah mengubah password melalui menu user Odoo. Jika
+akses admin belum tersedia, jalankan SQL berikut pada database lokal hasil
+restore:
+
+    UPDATE res_users SET password = 'admin' WHERE login = 'admin';
+
+Setelah berhasil login, segera ubah password melalui UI. Jangan menjalankan
+perintah ini pada database staging atau production.
+
+## Checklist Sebelum Mulai Coding
+
+- [ ] Database hasil restore bisa dibuka dari database manager.
+- [ ] Odoo tidak terkunci ke satu database.
+- [ ] User admin bisa login ke database lokal.
+- [ ] Package Python tambahan terpasang pada environment yang benar.
+- [ ] `addons_path` memuat semua dependency Prasmul.
+- [ ] Module list bisa di-update dan addon target bisa di-upgrade.
+- [ ] Database yang dipakai diberi nama development, misalnya `v18_prasmul_dev`.
+
+> Backup server adalah data sensitif. Simpan hanya di lokasi kerja yang
+> diizinkan, jangan commit file backup ke Git, dan jangan mengirimkannya ke
+> repository atau channel publik.
 
 # Checkpoint A — Wizard Reject Enrollment
 
@@ -794,6 +878,270 @@ Method-nya membuka ulang wizard yang sama (`res_id: self.id`), jadi record trans
 
 ---
 
+# Checkpoint E — REST API Consumer
+
+## Goal
+
+Odoo bertindak sebagai **consumer**: wizard mengambil daftar course dari REST API
+eksternal, memvalidasi respons, lalu melakukan `upsert` berdasarkan `code`.
+Import harus aman dijalankan berulang, memiliki timeout, dan hanya boleh dipakai
+Manager. Ini berbeda dari REST API provider pada Day 5.
+
+## Step 1 — Jalankan API Mock
+
+Di terminal terpisah dari root repository, jalankan:
+
+```bash
+python3 materi/labs/scripts/d04/mock_academy_api_server.py
+```
+
+Pastikan endpoint dapat diakses sebelum membuka wizard:
+
+```bash
+curl http://localhost:9090/api/courses
+```
+
+Responsnya harus memiliki key `courses` berupa list. Jangan gunakan API produksi
+untuk latihan ini.
+
+## Step 2 — Model Wizard
+
+Buat `wizards/import_external_courses_wizard.py`:
+
+```python
+import requests
+
+from odoo import fields, models
+from odoo.exceptions import UserError
+
+
+class ImportExternalCoursesWizard(models.TransientModel):
+    _name = "academy.import.courses.wizard"
+    _description = "Import External Courses Wizard"
+
+    api_url = fields.Char(
+        string="API URL",
+        default="http://localhost:9090/api/courses",
+        required=True,
+    )
+    last_response = fields.Text(string="Result", readonly=True)
+
+    def action_import(self):
+        try:
+            response = requests.get(self.api_url, timeout=10)
+            response.raise_for_status()
+        except requests.exceptions.RequestException as error:
+            raise UserError("Failed to call API: %s" % error)
+
+        try:
+            data = response.json()
+        except ValueError:
+            raise UserError("Invalid JSON response.")
+
+        courses = data.get("courses")
+        if not isinstance(courses, list):
+            raise UserError("Unexpected payload: 'courses' missing or invalid.")
+
+        course_model = self.env["academy.course"]
+        created = updated = 0
+        for item in courses:
+            code = (item.get("code") or "").strip()
+            name = (item.get("name") or "").strip()
+            if not code or not name:
+                continue
+
+            vals = {"name": name, "code": code}
+            if item.get("level") in ("beginner", "intermediate", "advanced"):
+                vals["level"] = item["level"]
+            if item.get("duration_hours") is not None:
+                vals["duration_hours"] = item["duration_hours"]
+            if item.get("price") is not None:
+                vals["price"] = item["price"]
+
+            existing = course_model.search([("code", "=", code)], limit=1)
+            if existing:
+                existing.write(vals)
+                updated += 1
+            else:
+                course_model.create(vals)
+                created += 1
+
+        self.last_response = "Imported: %s, Updated: %s" % (created, updated)
+        return {
+            "type": "ir.actions.act_window",
+            "res_model": self._name,
+            "res_id": self.id,
+            "view_mode": "form",
+            "target": "new",
+        }
+```
+
+`timeout=10`, `raise_for_status()`, validasi JSON, dan external key `code` adalah
+bagian penting dari kontrak integrasi ini. Jangan menambahkan `sudo()` untuk
+melewati akses user.
+
+## Step 3 — View, Init, Access, dan Menu
+
+Buat `wizards/import_external_courses_wizard_views.xml`:
+
+```xml
+<odoo>
+    <record id="view_import_courses_wizard_form" model="ir.ui.view">
+        <field name="name">academy.import.courses.wizard.form</field>
+        <field name="model">academy.import.courses.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Import External Courses">
+                <group>
+                    <field name="api_url"/>
+                    <field name="last_response" readonly="1"/>
+                </group>
+                <footer>
+                    <button name="action_import" string="Import"
+                            type="object" class="btn-primary"/>
+                    <button string="Close" special="cancel" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+    <record id="action_import_courses_wizard" model="ir.actions.act_window">
+        <field name="name">Import External Courses</field>
+        <field name="res_model">academy.import.courses.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>
+```
+
+Tambahkan import di `wizards/__init__.py`:
+
+```python
+from . import import_external_courses_wizard
+```
+
+Tambahkan satu baris access right **khusus Manager** di
+`security/ir.model.access.csv`:
+
+```csv
+access_import_courses_manager,import.courses.mgr,model_academy_import_courses_wizard,academy_management.academy_group_manager,1,1,1,1
+```
+
+Tambahkan view wizard ke `data` manifest, lalu tambahkan dependency Python:
+
+```python
+"wizards/import_external_courses_wizard_views.xml",
+```
+
+```python
+"external_dependencies": {"python": ["xlsxwriter", "requests"]},
+```
+
+Terakhir, tambahkan menu Manager-only di `views/academy_menus.xml`:
+
+```xml
+<menuitem id="menu_import_courses" name="Import External Courses"
+          parent="menu_academy_root" action="action_import_courses_wizard"
+          groups="academy_management.academy_group_manager" sequence="60"/>
+```
+
+## Step 4 — Upgrade dan Uji
+
+```bash
+./odoo/odoo-bin -c odoo.conf -d academy -u academy_management
+```
+
+1. Login sebagai Manager dan buka **Academy → Import External Courses**.
+2. Import sekali: dua course dibuat.
+3. Import lagi: tidak ada course duplikat; hasil menunjukkan `Updated`.
+4. Ubah URL menjadi endpoint tidak ada atau hentikan mock server: tampil `UserError`.
+5. Login sebagai user biasa: menu tidak muncul dan wizard tidak dapat diakses.
+
+## Checkpoint E selesai bila:
+
+- [ ] Request mempunyai timeout dan menangani HTTP/network error
+- [ ] Payload invalid ditolak secara jelas
+- [ ] Import kedua melakukan update, bukan duplikasi
+- [ ] Tidak ada `sudo()` pada alur import
+- [ ] Hanya Manager yang memiliki menu dan access right wizard
+
+> Kode lengkap pembanding: `source-checkpoints/d04/checkpoint_d_rest_api_consumer`.
+
+---
+
+# Checkpoint F — Odoo External API: JSON-RPC dan XML-RPC
+
+## Goal
+
+Memahami bagaimana sistem lain mengakses ORM Odoo. JSON-RPC diuji lewat Postman;
+XML-RPC diuji lewat script Python. Keduanya tunduk pada access rights dan record
+rules yang sama seperti UI.
+
+## JSON-RPC bukan REST
+
+| REST | JSON-RPC |
+|---|---|
+| Berorientasi resource dan HTTP verb | Berorientasi pemanggilan method |
+| Contoh: `GET /api/courses/1` | Model dan method ditentukan payload |
+| Status HTTP bagian utama kontrak | Respons membungkus hasil pada `result` atau `error` |
+
+## Step 1 — JSON-RPC melalui Postman
+
+Import collection berikut ke Postman dan aktifkan cookie jar agar `session_id`
+hasil login dibawa ke request selanjutnya:
+
+```text
+materi/labs/scripts/d04/jsonrpc_academy_course.postman_collection.json
+```
+
+Ubah collection variables `base_url`, `db`, `login`, dan `password`, kemudian
+jalankan secara berurutan: Authenticate → Create → Read → Update → Delete.
+`course_id` akan disimpan otomatis dari respons Create.
+
+Untuk payload manual, gunakan panduan:
+
+```text
+materi/labs/scripts/d04/jsonrpc_postman_payloads.md
+```
+
+Endpoint penting:
+
+```text
+POST /web/session/authenticate
+POST /web/dataset/call_kw/academy.course/search_read
+POST /web/dataset/call_kw/academy.course/create
+POST /web/dataset/call_kw/academy.course/write
+POST /web/dataset/call_kw/academy.course/unlink
+```
+
+Gunakan integration user non-admin yang punya group Manager untuk menguji batas
+akses. Hak `write` dan `unlink` tidak otomatis diberikan hanya karena request
+datang dari RPC.
+
+## Step 2 — XML-RPC melalui Python
+
+Ubah `URL`, `DB`, `USERNAME`, dan `PASSWORD` pada script bila perlu, lalu:
+
+```bash
+python3 materi/labs/scripts/d04/xmlrpc_search_read_courses.py
+python3 materi/labs/scripts/d04/xmlrpc_create_course.py
+```
+
+Script pertama melakukan `authenticate` lalu `search_read`; script kedua contoh
+opsional untuk `create`. Bila `authenticate` mengembalikan `False`, cek kredensial
+secara eksplisit—ia tidak selalu melempar exception.
+
+## Checkpoint F selesai bila:
+
+- [ ] JSON-RPC Authenticate menghasilkan `result.uid` dan session cookie terbawa
+- [ ] CRUD JSON-RPC berhasil dengan account yang berhak
+- [ ] CRUD gagal sesuai access right pada account yang tidak berhak
+- [ ] XML-RPC `search_read` mencetak daftar course
+- [ ] JSON-RPC tidak disebut sebagai REST API
+
+> Aset dan kode pembanding: `materi/labs/scripts/d04/` dan
+> `source-checkpoints/d04/checkpoint_e_external_api`.
+
+---
+
 # Bonus Reference — Business Reporting
 
 Bagian ini tidak wajib dibahas langkah demi langkah di kelas. Gunakan sebagai
@@ -894,6 +1242,11 @@ note atau invoice berstatus Cancelled. Jangan memanggil
 | Filter mempengaruhi isi file | ☐ |
 | File terunduh dengan nama benar | ☐ |
 | Tidak ada file `odoo/addons/` yang diedit | ☐ |
+| Import REST API menggunakan timeout dan idempotent by `code` | ☐ |
+| Hanya Manager dapat menjalankan Import External Courses | ☐ |
+| JSON-RPC Postman authenticate dan CRUD berhasil | ☐ |
+| XML-RPC `search_read` berhasil | ☐ |
+| JSON-RPC tidak disebut REST API | ☐ |
 
 ---
 

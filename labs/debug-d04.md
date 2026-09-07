@@ -1,5 +1,21 @@
 # Day 4 Debugging Checklist
 
+## 0. REST Consumer dan External API
+
+- `ModuleNotFoundError: requests` → install `requests` pada Python environment
+  yang sama dengan Odoo, lalu restart Odoo.
+- Import timeout/connection refused → jalankan
+  `python3 materi/labs/scripts/d04/mock_academy_api_server.py`, lalu cek
+  `curl http://localhost:9090/api/courses`.
+- Import kedua membuat duplikat → pastikan pencarian memakai `code`, bukan nama;
+  `code` adalah external key untuk idempotent upsert.
+- JSON-RPC disebut REST → koreksi istilah: JSON-RPC adalah remote procedure call;
+  model dan method dipilih dari payload.
+- JSON-RPC gagal setelah Authenticate → aktifkan Postman cookie jar agar
+  `session_id` terbawa pada request berikutnya.
+- XML-RPC `authenticate` menghasilkan `False` → cek URL, DB, login, password,
+  serta bahwa user memiliki group/access right yang diperlukan.
+
 ## 1. Wizard error `You are not allowed to access`
 
 Kesalahan nomor satu di Day 4. Model `TransientModel` **tetap butuh** access right:
