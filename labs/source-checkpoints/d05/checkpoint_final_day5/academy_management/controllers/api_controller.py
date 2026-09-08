@@ -1,6 +1,8 @@
+import json
+from base64 import b64encode
+
 from odoo import http
 from odoo.http import request
-import json
 
 
 # ---------------------------------------------------------------------------
@@ -245,3 +247,86 @@ class AcademyApiController(http.Controller):
             },
             status=201,
         )
+
+    @http.route(
+        "/academy/api/v1/enrollment-requests-with-multipart",
+        type="http",
+        auth="public",
+        methods=["POST"],
+        csrf=False,
+    )
+    def create_enrollment_request_with_multipart(self, **kw):
+        """Create an enrollment and optionally attach a multipart upload."""
+        if not self._check_api_key():
+            return _err("UNAUTHORIZED", "Invalid or missing API key.", status=401)
+
+        form = request.httprequest.form
+        payload = {
+            "student_name": form.get("student_name", ""),
+            "student_email": form.get("student_email", ""),
+            "batch_code": form.get("batch_code", ""),
+            "notes": form.get("notes", ""),
+        }
+        required = ["student_name", "student_email", "batch_code"]
+        missing = [field for field in required if not payload[field].strip()]
+        if missing:
+            return _err(
+                "MISSING_FIELDS",
+                "Required fields missing: %s." % ", ".join(missing),
+                status=400,
+            )
+
+        batch_code = payload["batch_code"].strip()
+        student_email = payload["student_email"].strip()
+        batch = request.env["academy.batch"].sudo().search(
+            [("code", "=", batch_code)], limit=1
+        )
+        if not batch:
+            return _err(
+                "BATCH_NOT_FOUND",
+                "Batch with code '%s' not found." % batch_code,
+                status=404,
+            )
+
+        student = request.env["academy.student"].sudo().search(
+            [("email", "=", student_email)], limit=1
+        )
+        if not student:
+            student = request.env["academy.student"].sudo().create({
+                "name": payload["student_name"].strip(),
+                "email": student_email,
+            })
+
+        existing = request.env["academy.enrollment"].sudo().search([
+            ("batch_id", "=", batch.id),
+            ("student_id", "=", student.id),
+        ], limit=1)
+        if existing:
+            return _ok({
+                "enrollment_id": existing.id,
+                "enrollment_name": existing.name,
+                "state": existing.state,
+                "note": "Enrollment already exists.",
+            })
+
+        uploaded_file = (
+            request.httprequest.files.get("file_upload")
+            or request.httprequest.files.get("file")
+        )
+        file_upload = None
+        if uploaded_file and uploaded_file.filename:
+            file_upload = b64encode(uploaded_file.read()).decode("ascii")
+
+        enrollment = request.env["academy.enrollment"].sudo().create({
+            "batch_id": batch.id,
+            "student_id": student.id,
+            "notes": payload["notes"].strip(),
+            "file_upload": file_upload,
+        })
+        return _ok({
+            "enrollment_id": enrollment.id,
+            "enrollment_name": enrollment.name,
+            "state": enrollment.state,
+            "batch_code": batch_code,
+            "student_email": student_email,
+        }, status=201)

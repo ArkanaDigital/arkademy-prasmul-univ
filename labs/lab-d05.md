@@ -482,6 +482,116 @@ Cukup untuk training dan integrasi internal sederhana. Untuk produksi: `res.user
 
 ---
 
+# Class Improvement — Upload File dengan Multipart Form
+
+## Goal
+
+Endpoint enrollment dapat menerima metadata pendaftaran dan file dalam satu
+request `multipart/form-data`. Endpoint JSON yang sudah dibuat tetap dipakai
+untuk integrasi JSON-only; endpoint baru ini khusus untuk client yang mengirim
+file secara native.
+
+## Mengapa Endpoint Terpisah?
+
+- `multipart/form-data` lebih hemat daripada Base64 dalam JSON karena tidak
+  menambah ukuran payload sekitar 33%.
+- Kontrak endpoint JSON yang telah dipublikasikan tidak berubah.
+- Odoo menyimpan `fields.Binary` dalam Base64, sehingga controller yang
+  melakukan konversi dari isi file multipart.
+
+## Step 1 — Tambahkan Field Binary
+
+Di `models/academy_enrollment.py`, tambahkan field untuk dokumen pendukung:
+
+```python
+    file_upload = fields.Binary(string="File Upload")
+```
+
+Upgrade module setelah mengubah model. Perubahan controller berikutnya tetap
+membutuhkan restart server penuh.
+
+## Step 2 — Import Base64 dan Endpoint Multipart
+
+Di `controllers/api_controller.py`, tambahkan import:
+
+```python
+from base64 import b64encode
+```
+
+Tambahkan endpoint berikut di dalam `AcademyApiController`. Endpoint ini
+menggunakan field teks `student_name`, `student_email`, `batch_code`, dan
+opsional `notes`; file dikirim pada field `file_upload` (atau alias `file`).
+
+```python
+    @http.route("/academy/api/v1/enrollment-requests-with-multipart",
+                type="http", auth="public", methods=["POST"], csrf=False)
+    def create_enrollment_request_with_multipart(self, **kw):
+        if not self._check_api_key():
+            return _err("UNAUTHORIZED", "API key salah atau tidak ada.",
+                        status=401)
+
+        form = request.httprequest.form
+        payload = {
+            "student_name": form.get("student_name", ""),
+            "student_email": form.get("student_email", ""),
+            "batch_code": form.get("batch_code", ""),
+            "notes": form.get("notes", ""),
+        }
+        uploaded_file = (
+            request.httprequest.files.get("file_upload")
+            or request.httprequest.files.get("file")
+        )
+        file_upload = None
+        if uploaded_file and uploaded_file.filename:
+            file_upload = b64encode(uploaded_file.read()).decode("ascii")
+
+        return self._create_enrollment_request(
+            payload, file_upload=file_upload
+        )
+```
+
+Refactor logika validasi, pencarian batch/student, idempotensi, dan `create()`
+dari endpoint JSON menjadi helper `_create_enrollment_request(payload,
+file_upload=None)`. Dengan begitu JSON dan multipart memiliki aturan bisnis
+yang persis sama; hanya cara membaca body request yang berbeda.
+
+## Step 3 — Uji dengan curl
+
+```bash
+URL=http://localhost:8069/academy/api/v1/enrollment-requests-with-multipart
+
+curl -i -X POST "$URL" \
+  -H "X-API-Key: academy-demo-key" \
+  -F "student_name=Budi Multipart" \
+  -F "student_email=budi-multipart@test.com" \
+  -F "batch_code=PY-101-JAN" \
+  -F "notes=Dokumen pendaftaran dari multipart." \
+  -F "file_upload=@./ktp-budi.jpg"
+```
+
+Expected: `201 Created` saat enrollment baru dibuat. Kirim ulang dengan email
+dan batch yang sama: hasilnya `200`, tanpa enrollment duplikat. Field file
+bersifat opsional; kirim request tanpa `-F file_upload=...` untuk membuktikan
+pendaftaran tanpa lampiran juga tetap valid.
+
+## Uji lewat Postman
+
+Import kembali `scripts/d05/academy_api_day5.postman_collection.json`, buka
+request **12 — Enrollment Multipart Valid (201)**, lalu pilih file lokal pada
+field `file_upload`. Jangan set header `Content-Type` secara manual; Postman
+akan menambahkan boundary multipart yang benar.
+
+## Checkpoint improvement selesai bila:
+
+- [ ] Endpoint `/academy/api/v1/enrollment-requests-with-multipart` menerima
+  `multipart/form-data`.
+- [ ] File pada `file_upload` tersimpan di field Binary enrollment.
+- [ ] API key, validasi field wajib, batch 404, dan idempotensi tetap sama
+  dengan endpoint JSON.
+- [ ] Endpoint JSON lama tidak berubah kontraknya.
+
+---
+
 # Checkpoint F — Client XML-RPC
 
 ## Goal

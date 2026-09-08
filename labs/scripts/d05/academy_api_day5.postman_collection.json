@@ -9,7 +9,8 @@
     {"key": "course_code", "value": "PY-101"},
     {"key": "batch_code", "value": "PY-101-JAN"},
     {"key": "api_key", "value": "academy-demo-key"},
-    {"key": "student_email", "value": "postman@example.test"}
+    {"key": "student_email", "value": "postman@example.test"},
+    {"key": "multipart_student_email", "value": "postman-multipart@example.test"}
   ],
   "item": [
     {"name": "01 — Ping (200)", "request": {"method": "GET", "header": [], "url": "{{base_url}}/academy/api/v1/ping"}},
@@ -22,6 +23,7 @@
     {"name": "08 — Enrollment Sama (200 Idempotensi)", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}, {"key": "X-API-Key", "value": "{{api_key}}"}], "body": {"mode": "raw", "raw": "{\n  \"student_name\": \"Postman Student\",\n  \"student_email\": \"{{student_email}}\",\n  \"batch_code\": \"{{batch_code}}\",\n  \"notes\": \"Dibuat dari Postman.\"\n}"}, "url": "{{base_url}}/academy/api/v1/enrollment-requests"}},
     {"name": "09 — Field Wajib Kurang (400)", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}, {"key": "X-API-Key", "value": "{{api_key}}"}], "body": {"mode": "raw", "raw": "{\n  \"student_name\": \"Postman Tidak Lengkap\"\n}"}, "url": "{{base_url}}/academy/api/v1/enrollment-requests"}},
     {"name": "10 — Batch Tidak Ada (404)", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}, {"key": "X-API-Key", "value": "{{api_key}}"}], "body": {"mode": "raw", "raw": "{\n  \"student_name\": \"Postman Batch Salah\",\n  \"student_email\": \"missing-batch@example.test\",\n  \"batch_code\": \"BATCH-TIDAK-ADA\"\n}"}, "url": "{{base_url}}/academy/api/v1/enrollment-requests"}},
-    {"name": "11 — JSON Rusak (400)", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}, {"key": "X-API-Key", "value": "{{api_key}}"}], "body": {"mode": "raw", "raw": "{bukan json}"}, "url": "{{base_url}}/academy/api/v1/enrollment-requests"}}
+    {"name": "11 — JSON Rusak (400)", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}, {"key": "X-API-Key", "value": "{{api_key}}"}], "body": {"mode": "raw", "raw": "{bukan json}"}, "url": "{{base_url}}/academy/api/v1/enrollment-requests"}},
+    {"name": "12 — Enrollment Multipart Valid (201)", "request": {"method": "POST", "header": [{"key": "X-API-Key", "value": "{{api_key}}"}], "body": {"mode": "formdata", "formdata": [{"key": "student_name", "value": "Postman Multipart Student", "type": "text"}, {"key": "student_email", "value": "{{multipart_student_email}}", "type": "text"}, {"key": "batch_code", "value": "{{batch_code}}", "type": "text"}, {"key": "notes", "value": "Dibuat dari multipart Postman.", "type": "text"}, {"key": "file_upload", "type": "file", "src": ""}]}, "url": "{{base_url}}/academy/api/v1/enrollment-requests-with-multipart"}}
   ]
 }

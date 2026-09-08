@@ -23,6 +23,7 @@ class AcademyEnrollment(models.Model):
         ("cancelled", "Cancelled"),
     ], default="draft", tracking=True)
     notes = fields.Text()
+    file_upload = fields.Binary(string="File Upload")
 
     # --- approval metadata (audit trail) ---
     submitted_by_id = fields.Many2one("res.users", string="Submitted By", readonly=True)
